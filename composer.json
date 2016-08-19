@@ -1,0 +1,31 @@
+{
+    "name": "1happyplace/clio",
+    "description": "Seriously level-up the user interface of your PHP CLI programs.",
+    "keywords": ["Terminal","Emulator","ANSI","bash"],
+    "homepage": "http://clio.1happyplace.com/clio/clio.html",
+    "type": "library",
+    "require-dev": {
+      "phpunit/phpunit": "^5.4",
+      "1happyplace/phpunit-colors": "1.*"
+    },
+    "autoload": {
+      "psr-4": {
+        "Clio\\": "src/Clio/"
+      }
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Katie Ayres",
+            "email": "katie@1happyplace.com",
+            "homepage": "http://1happyplace.com",
+            "role": "Developer"
+        }
+    ],
+    "minimum-stability": "beta",
+    "require": {
+      "1happyplace/ansi-terminal": "*"
+    }
+}
+
+
