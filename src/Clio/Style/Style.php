@@ -4,6 +4,7 @@ namespace Clio\Style;
 
 use ANSI\Color\Color;
 use ANSI\Color\ColorInterface;
+use ANSI\TerminalState;
 use ANSI\TerminalStateInterface;
 
 
@@ -127,6 +128,70 @@ class Style implements StyleInterface
         // chaining
         return $this;
         
+        
+    }
+
+    /**
+     * Return a Terminal State object based on the styling settings
+     * NOTE: The styling interface and terminal interfaces are similar
+     *       in structure, but not how they work, so they have been
+     *       kept separate. Terminal states are concrete, bold and
+     *       underscore are on or off, colors are instantiated, but
+     *       might be no color.  Styles are desired states and therefore
+     *       have a third state which is undefined, which means let another
+     *       style define this state (e.g. if bold is undefined, but another
+     *       style in a stack turns bold on, then it will be on.
+     *
+     * @return TerminalStateInterface
+     */
+    public function getState() {
+        
+        // build the returned object
+        $ret = new TerminalState();
+
+        // only set the bold value if it is true, it is false if it
+        // is undefined (null) or false
+        if ($this->bold === true) {
+
+            // turn on bolding
+            $ret->setBold(true);
+
+        }
+
+        // only set the underscore value if it is true, it is false if it
+        // is undefined (null) or false
+        if ($this->underscore === true) {
+
+            // turn on underscoring
+            $ret->setUnderscore(true);
+
+        }
+        
+        // if the text color is not null
+        if ($this->textColor) {
+            
+            // if it is valid
+            if ($this->textColor->isValid()) {
+                
+                // set the text color
+                $ret->setTextColor($this->textColor);                
+            }
+        }
+
+
+        // if the fill color is not null
+        if ($this->fillColor) {
+
+            // if it is valid
+            if ($this->fillColor->isValid()) {
+
+                // set the fill color
+                $ret->setFillColor($this->fillColor);
+            }
+        }
+        
+        // return the terminal state
+        return $ret;
         
     }
 

@@ -1,5 +1,6 @@
 <?php
 
+use ANSI\TerminalStateInterface;
 use PHPUnit\Framework\TestCase;
 
 use ANSI\BasicTerminal;
@@ -183,6 +184,95 @@ class StyleTest extends TestCase
 
 
     }
+
+    /**
+     * public function getState()
+     * 
+     * Return a Terminal State object based on the styling settings
+     * NOTE: The styling interface and terminal interfaces are similar
+     *       in structure, but not how they work, so they have been
+     *       kept separate, terminal states do not have undefined states
+     *       bold is either on or off, while styles can pancake on each
+     *       other where bold can also be undefined (null).
+     *
+     * @return TerminalStateInterface
+     */
+    public function test_getState() {
+
+        // default style
+        $style = new Style();
+        $state = $style->getState();
+        $this->assertInstanceOf("\\ANSI\\TerminalState",$state);
+        $this->assertFalse($state->isBold());
+        $this->assertFalse($state->isUnderscore());
+        $this->assertFalse($state->getTextColor()->isValid());
+        $this->assertFalse($state->getFillColor()->isValid());
+
+        // turn off bold and underscore, still should be false
+        $style->setUnderscore(false)->setBold(false);
+        $state = $style->getState();
+        $this->assertInstanceOf("\\ANSI\\TerminalState",$state);
+        $this->assertFalse($state->isBold());
+        $this->assertFalse($state->isUnderscore());
+        $this->assertFalse($state->getTextColor()->isValid());
+        $this->assertFalse($state->getFillColor()->isValid());
+
+        // turn on bold and underscore, still should be false
+        $style->setBold(true)->setUnderscore(true);
+        $state = $style->getState();
+        $this->assertInstanceOf("\\ANSI\\TerminalState",$state);
+        $this->assertTrue($state->isBold());
+        $this->assertTrue($state->isUnderscore());
+        $this->assertFalse($state->getTextColor()->isValid());
+        $this->assertFalse($state->getFillColor()->isValid());
+
+        // clear bold
+        $style->clearBoldStyling();
+        $state = $style->getState();
+        $this->assertInstanceOf("\\ANSI\\TerminalState",$state);
+        $this->assertFalse($state->isBold());
+        $this->assertTrue($state->isUnderscore());
+        $this->assertFalse($state->getTextColor()->isValid());
+        $this->assertFalse($state->getFillColor()->isValid());
+
+        // set the text color
+        $style->setTextColor("red");
+        $state = $style->getState();
+        $this->assertInstanceOf("\\ANSI\\TerminalState",$state);
+        $this->assertFalse($state->isBold());
+        $this->assertTrue($state->isUnderscore());
+        $this->assertSame("red",$state->getTextColor()->getName());
+        $this->assertFalse($state->getFillColor()->isValid());
+
+        // clear text, add fill
+        $style->clearTextColor()->setFillColor("green");
+        $state = $style->getState();
+        $this->assertInstanceOf("\\ANSI\\TerminalState",$state);
+        $this->assertFalse($state->isBold());
+        $this->assertTrue($state->isUnderscore());
+        $this->assertFalse($state->getTextColor()->isValid());
+        $this->assertSame("green",$state->getFillColor()->getName());
+
+        // set all properties
+        $style->setBold()->setUnderscore()->setTextColor("yellow")->setFillColor("orange");
+        $state = $style->getState();
+        $this->assertInstanceOf("\\ANSI\\TerminalState",$state);
+        $this->assertTrue($state->isBold());
+        $this->assertTrue($state->isUnderscore());
+        $this->assertSame("yellow",$state->getTextColor()->getName());
+        $this->assertSame("orange",$state->getFillColor()->getName());
+
+        // finally clear everything
+        $style->clearBoldStyling()->clearUnderscoreStyling()->clearTextColor()->clearFillColor();
+        $state = $style->getState();
+        $this->assertInstanceOf("\\ANSI\\TerminalState",$state);
+        $this->assertFalse($state->isBold());
+        $this->assertFalse($state->isUnderscore());
+        $this->assertFalse($state->getTextColor()->isValid());
+        $this->assertFalse($state->getFillColor()->isValid());
+
+    }
+    
 
     /**
      * setMembersTo(StyleInterface $style)
