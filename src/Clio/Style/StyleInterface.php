@@ -4,6 +4,7 @@ namespace Clio\Style;
 
 use ANSI\Color\Color;
 use ANSI\Color\ColorInterface;
+use ANSI\TerminalState;
 use ANSI\TerminalStateInterface;
 
 
@@ -27,6 +28,21 @@ interface StyleInterface
      * @param TerminalStateInterface $state
      */
     public function initialize(TerminalStateInterface $state);
+
+    /**
+     * Return a Terminal State object based on the styling settings
+     * NOTE: The styling interface and terminal interfaces are similar
+     *       in structure, but not how they work, so they have been
+     *       kept separate. Terminal states are concrete, bold and
+     *       underscore are on or off, colors are instantiated, but
+     *       might be no color.  Styles are desired states and therefore
+     *       have a third state which is undefined, which means let another
+     *       style define this state (e.g. if bold is undefined, but another
+     *       style in a stack turns bold on, then it will be on.
+     *
+     * @return TerminalState
+     */
+    public function getState();
     
     /**
      * Override a style, if anything is set to null, then don't change the value of the recipient object

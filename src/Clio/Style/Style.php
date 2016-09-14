@@ -142,7 +142,7 @@ class Style implements StyleInterface
      *       style define this state (e.g. if bold is undefined, but another
      *       style in a stack turns bold on, then it will be on.
      *
-     * @return TerminalStateInterface
+     * @return TerminalState
      */
     public function getState() {
         
