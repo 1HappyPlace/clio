@@ -22,7 +22,6 @@
             "role": "Developer"
         }
     ],
-    "minimum-stability": "beta",
     "require": {
       "1happyplace/ansi-terminal": "*"
     }
