@@ -1,25 +1,13 @@
 <?php
 
+require_once __DIR__ . "/../TestStubs/ClioStub.php";
 
 use ANSI\Color\Color;
 use ANSI\Color\Mode;
 use Clio\Clio;
-use Clio\Style\Style;
+use Clio\Styling\Markup\Markup;
+use Clio\Styling\Style;
 use PHPUnit\Framework\TestCase;
-
-class ClioEcho extends Clio {
-
-    /**
-     *
-     * All output goes to this function
-     *
-     * @param string $text
-     */
-    public function output($text) {
-        // echo the text
-        echo str_replace("\033","\\e",$text);
-    }
-}
 
 
 class ClioTest extends TestCase
@@ -59,40 +47,43 @@ class ClioTest extends TestCase
     public function test__construct()
     {
         // create a new object and do nothing, both construct and destruct will fire
-        $clio = new ClioEcho();
+        $clio = new ClioStub();
+        $output = ClioStub::$startupSequencePrintable;
 
         // mode
         // default is XTERM
         $clio->setTextColor("red")->outputEscapeSequence();
-        $output = "\\e[38;5;9m";
-
-        $this->expectOutputString($output);
-
+        $output .= "\\e[38;5;9m";
 
         // valid mode
-        $clio = new ClioEcho("RGB");
+        $clio = new ClioStub("RGB");
+        $output .= ClioStub::$startupSequencePrintable;
         $clio->setTextColor("red")->outputEscapeSequence();
-        $output .= "\\e[38;2;255;0;0m";
+        $output .=  "\\e[38;2;255;0;0m";
 
 
         // text color
-        $clio = new ClioEcho(Mode::XTERM, "black");
+        $clio = new ClioStub(Mode::XTERM, "black");
+        $output .= ClioStub::$startupSequencePrintable;
         $clio->outputEscapeSequence();
-        $output .= "\\e[38;5;0m";
+        $output .=  "\\e[38;5;0m";
 
         // fill color
-        $clio = new ClioEcho(Mode::XTERM, null, "black");
+        $clio = new ClioStub(Mode::XTERM, null, "black");
+        $output .= ClioStub::$startupSequencePrintable;
         $clio->outputEscapeSequence();
-        $output .= "\\e[48;5;0m";
+        $output .=  "\\e[48;5;0m";
 
         // both
-        $clio = new ClioEcho(Mode::XTERM, "red", "black");
+        $clio = new ClioStub(Mode::XTERM, "red", "black");
+        $output .= ClioStub::$startupSequencePrintable;
         $clio->outputEscapeSequence();
-        $output .= "\\e[38;5;9;48;5;0m";
+        $output .=  "\\e[38;5;9;48;5;0m";
 
 
         // chaining
-        $clio = (new Clio(Mode::XTERM))->setBold();
+        $clio = (new ClioStub(Mode::XTERM))->setBold();
+        $output .= ClioStub::$startupSequencePrintable;
         $this->assertTrue($clio->getBold());
 
         $this->expectOutputString($output);
@@ -118,7 +109,7 @@ class ClioTest extends TestCase
         // it just echos, not much to test here
         $clio = new Clio();
         $clio->output("hello");
-        $this->expectOutputString("hello");
+        $this->expectOutputString(ClioStub::$startupSequence . "hello");
 
     }
 
@@ -150,15 +141,17 @@ class ClioTest extends TestCase
         // ensure the text and fill are set to default colors when clear is called
 
         // no default colors
-        $clio = new ClioEcho();
+        $clio = new ClioStub();
+        $output = ClioStub::$startupSequencePrintable ;
         $this->assertNull($clio->getDefaultTextColor());
         $this->assertNull($clio->getDefaultTextColor());
         $clio->clear(true);
 
         // clear should go out
-        $output = "\\e[0m";
+        $output .= "\\e[0m";
 
-        $clio = new ClioEcho(19000,"Floral White", "Dark Cyan");
+        $clio = new ClioStub(19000,"Floral White", "Dark Cyan");
+        $output .= ClioStub::$startupSequencePrintable;
         $clio->clear(true);
         $output .= "\\e[0m\\e[38;2;255;250;240;48;2;0;139;139m";
 
@@ -168,11 +161,32 @@ class ClioTest extends TestCase
         $output .= "\\e[38;2;255;0;0m";
 
 
+        $clio = new ClioStub(Mode::VT100);
+        $output .= ClioStub::$startupSequencePrintable;
+
+        // hit clear without any styling
+        $clio->clear();
+
+        // hit clear with something on the stack
+        $clio->addMarkupDefinition("!blue!",(new Style())->setTextColor(Color::blue()));
+
+
+        $text = "This is !blue!blue.";
+        $clio->display($text);
+        $output .= "This is \\e[34mblue.";
+
+        // now send the clear
+        $clio->clear();
+        $text = "This is plain text.";
+        $clio->display($text);
+        $output .= "\\e[0mThis is plain text.";
 
         $this->expectOutputString($output);
 
 
     }
+
+
 
 
 
@@ -191,14 +205,14 @@ class ClioTest extends TestCase
      */
     public function test_b() {
         // simple bold
-        (new ClioEcho())->b()->outputEscapeSequence();
+        (new ClioStub())->b()->outputEscapeSequence();
 
         // ensure the text is surrounded with the correct sequence
-        $output = "\\e[1m";
+        $output = ClioStub::$startupSequencePrintable . "\\e[1m";
 
-        $clio = new ClioEcho();
+        $clio = new ClioStub();
         $clio->b()->b()->outputEscapeSequence();
-        $output .= "\\e[1m";
+        $output .= ClioStub::$startupSequencePrintable . "\\e[1m";
 
         $clio->b(false)->outputEscapeSequence();
         $output .= "\\e[0m";
@@ -223,14 +237,14 @@ class ClioTest extends TestCase
     public function test_u() {
 
         // simple bold
-        (new ClioEcho())->u()->outputEscapeSequence();
+        (new ClioStub())->u()->outputEscapeSequence();
 
         // ensure the text is surrounded with the correct sequence
-        $output = "\\e[4m";
+        $output = ClioStub::$startupSequencePrintable . "\\e[4m";
 
-        $clio = new ClioEcho();
+        $clio = new ClioStub();
         $clio->u()->u()->outputEscapeSequence();
-        $output .= "\\e[4m";
+        $output .= ClioStub::$startupSequencePrintable . "\\e[4m";
 
         $clio->u(false)->outputEscapeSequence();
         $output .= "\\e[0m";
@@ -305,11 +319,12 @@ class ClioTest extends TestCase
      */
     public function test_textColor() {
 
-        $clio = new ClioEcho();
+        $clio = new ClioStub();
+        $output = ClioStub::$startupSequencePrintable;
 
         // start with a new color
         $clio->textColor("aquamarine")->outputEscapeSequence();
-        $output = "\\e[38;5;122m";
+        $output .= "\\e[38;5;122m";
 
 
         // same color (in name) should have no effect
@@ -331,9 +346,9 @@ class ClioTest extends TestCase
         $output .= "\\e[38;5;143m";
 
         // now do RGB just cause
-        $clio = (new ClioEcho(Mode::RGB))->setTextColor("dark khaki")->b();
+        $clio = (new ClioStub(Mode::RGB))->setTextColor("dark khaki")->b();
         $clio->outputEscapeSequence();
-        $output .= "\\e[1;38;2;189;183;107m";
+        $output .= ClioStub::$startupSequencePrintable . "\\e[1;38;2;189;183;107m";
 
 
         $this->expectOutputString($output);
@@ -352,11 +367,12 @@ class ClioTest extends TestCase
      */
     public function test_clearTextColor() {
 
-        $clio = new ClioEcho(Mode::VT100);
+        $clio = new ClioStub(Mode::VT100);
+        $output = ClioStub::$startupSequencePrintable;
 
         // set up a text color of ansiblack
         $clio->textColor("ansiblack")->outputEscapeSequence();
-        $output = "\\e[30m";
+        $output .= "\\e[30m";
 
         // clear it out
         $clio->clearTextColor()->outputEscapeSequence();
@@ -368,9 +384,9 @@ class ClioTest extends TestCase
         $output .= "\\e[1;40m";
 
         // default colors
-        $clio = new ClioEcho("xterm","lime","orange");
+        $clio = new ClioStub("xterm","lime","orange");
         $clio->outputEscapeSequence();
-        $output .= "\\e[38;5;10;48;5;214m";
+        $output .= ClioStub::$startupSequencePrintable . "\\e[38;5;10;48;5;214m";
 
         // now ask for a fill, text color, then clear the text color, should just see the commanding of the fill (and bold)
         $clio->fillColor("ansiblack")->textColor("ansiblue")->clearTextColor()->b()->outputEscapeSequence();
@@ -403,11 +419,12 @@ class ClioTest extends TestCase
      */
     public function test_fillColor() {
 
-        $clio = new ClioEcho();
+        $clio = new ClioStub();
+        $output = ClioStub::$startupSequencePrintable;
 
         // start with a new color
         $clio->fillColor("aquamarine")->outputEscapeSequence();
-        $output = "\\e[48;5;122m";
+        $output .= "\\e[48;5;122m";
 
 
         // should have no effect (same color by name)
@@ -426,9 +443,9 @@ class ClioTest extends TestCase
 
 
         // set up RGB for fun
-        $clio = (new ClioEcho(Mode::RGB))->setFillColor("dark khaki")->b();
+        $clio = (new ClioStub(Mode::RGB))->setFillColor("dark khaki")->b();
         $clio->outputEscapeSequence();
-        $output .= "\\e[1;48;2;189;183;107m";
+        $output .= ClioStub::$startupSequencePrintable . "\\e[1;48;2;189;183;107m";
 
 
         $this->expectOutputString($output);
@@ -447,11 +464,12 @@ class ClioTest extends TestCase
      */
     public function test_clearFillColor() {
 
-        $clio = new ClioEcho(Mode::VT100);
+        $clio = new ClioStub(Mode::VT100);
+        $output = ClioStub::$startupSequencePrintable;
 
         // set up a fill color of black
         $clio->fillColor("ansiblack")->outputEscapeSequence();
-        $output = "\\e[40m";
+        $output .= "\\e[40m";
 
         // clear it
         $clio->clearFillColor()->outputEscapeSequence();
@@ -463,9 +481,9 @@ class ClioTest extends TestCase
         $output .= "\\e[1;30m";
 
         // default colors
-        $clio = new ClioEcho("xterm","lime","orange");
+        $clio = new ClioStub("xterm","lime","orange");
         $clio->outputEscapeSequence();
-        $output .= "\\e[38;5;10;48;5;214m";
+        $output .= ClioStub::$startupSequencePrintable . "\\e[38;5;10;48;5;214m";
 
         // set up a text color and fill, clear the fill and add bold
         $clio->textColor("ansiblack")->fillColor("ansiblue")->clearFillColor()->b()->outputEscapeSequence();
@@ -493,7 +511,7 @@ class ClioTest extends TestCase
     public function test_colors() {
 
         // this only calls textColor and fillColor, so just ensure the data flows through
-        $clio = new ClioEcho();
+        $clio = new Clio();
         $clio->colors("red","blue");
         $this->assertSame("red",$clio->getTextColor()->getName());
         $this->assertSame("blue",$clio->getFillColor()->getName());
@@ -516,14 +534,15 @@ class ClioTest extends TestCase
      * param StyleInterface $style
      * return $this
      */
-    public function test_setStyle() {
+    public function test_setStyle_style() {
 
         // empty style
         $style = new Style();
-        $clio = new ClioEcho();
+        $clio = new ClioStub();
+        $output = ClioStub::$startupSequencePrintable;
 
         $clio->setStyle($style)->outputEscapeSequence();
-        $output = "";
+
 
         $style->setBold();
         $clio->setStyle($style)->outputEscapeSequence();
@@ -535,7 +554,7 @@ class ClioTest extends TestCase
 
         // turn off underscore, ensure the rest is preserved
         $style->setUnderscore(false);
-        $clio->setStyle($style)->outputEscapeSequence();
+        $clio->style($style)->outputEscapeSequence();
         $output .= "\\e[0;1;38;5;9;48;5;0m";
 
 
@@ -545,101 +564,7 @@ class ClioTest extends TestCase
     }
 
 
-    /**
-     * public function style($text, StyleInterface $temporaryStyle)
-     * 
-     * Display the text.  This does not jump down to a new line.
-     * If a temporary style is used, only the values that are not null will be used.
-     *
-     * param $text
-     * param StyleInterface|null $style - if defined, a temporary style to use for this text only
-     *
-     * return $this
-     */
-    public function test_displayInStyle() {
 
-        $clio = new ClioEcho();
-
-        // no styling anywhere
-        $style = new Style();
-        $clio->style("a",$style);
-
-        $output = "a";
-
-        // no styling in place, add underscore
-        $style->setUnderscore();
-        $clio->style("b",$style)->display("c");
-
-        $output .= "\\e[4mb\\e[0mc";
-
-        // add bolding to styling in place, add text color to temporary styling
-        $clio->b();
-        $style->setTextColor("lime");
-        $clio->style("d",$style)->display("e");
-
-        $output .= "\\e[1;4;38;5;10md\\e[0;1me";
-
-        // keep styling in place, but tell the temporary style to turn off bolding
-        $style->setBold(false);
-        $clio->style("f",$style)->display("g");
-
-        $output .= "\\e[0;4;38;5;10mf\\e[0;1mg";
-
-        // put in complete styling in place, let the temporary style completely override it
-        $clio->u()->b()->setTextColor("lightslategray")->setFillColor(Color::black());
-        $style->setUnderscore(false)->setBold(false)->setTextColor("Purple")->setFillColor("PaleGreen");
-        $clio->style("h",$style)->display("i");
-
-        $output .= "\\e[0;38;5;90;48;5;120mh\\e[1;4;38;5;102;48;5;0mi";
-
-        // let the temporary style have no effect
-        $empty = new Style();
-        $clio->style("j",$empty)->display("k");
-
-        $output .= "jk";
-
-        // have the temporary style just change the text color
-        $empty->setTextColor("purple");
-        $clio->style("purple",$empty)->display("no purple");
-
-        $output .= "\\e[38;5;90mpurple\\e[38;5;102mno purple";
-
-
-
-        $this->expectOutputString($output);
-
-    }
-
-    /**
-     * public function styleLine($text, StyleInterface $style)
-     *
-     * Send out text with the specified style and hit the carriage return
-     *
-     * param string $text
-     * param StyleInterface $style
-     * return $this
-     */
-    public function test_styleLine() {
-
-        // this function merely call style and newline, so just ensure the calls work
-
-        $clio = new ClioEcho();
-
-        // create a style
-        $style = (new Style())->setBold();
-
-        // ensure the internal calls work properly
-        $clio->styleLine("Here is a bold line.",$style);
-        $output = "\\e[1mHere is a bold line.\\e[0m\n";
-
-        // chaining
-        $clio->styleLine("a",$style)->styleLine("b",$style);
-        $output .= "\\e[1ma\\e[0m\n\\e[1mb\\e[0m\n";
-
-        $this->expectOutputString($output);
-
-
-    }
 
 
     /////////////////////////////////////////////////////////////////////////////////////////
@@ -660,7 +585,7 @@ class ClioTest extends TestCase
 
         $clio = new Clio();
         $clio->out("Hello World!");
-        $output = "Hello World!";
+        $output = ClioStub::$startupSequence . "Hello World!";
 
         // chaining
         $clio->out("a")->out("b");
@@ -681,12 +606,13 @@ class ClioTest extends TestCase
 
         // this function merely call display and newline, so just ensure the calls work
 
-        $clio = new ClioEcho();
+        $clio = new ClioStub();
+        $output = ClioStub::$startupSequencePrintable;
 
 
         // ensure the internal calls work properly
         $clio->line("Here is a line.");
-        $output = "Here is a line.\n";
+        $output .= "Here is a line.\n";
 
         // chaining
         $clio->line("a")->line("b");
@@ -711,7 +637,7 @@ class ClioTest extends TestCase
 
 
         $clio->nl();
-        $output = "\n";
+        $output = ClioStub::$startupSequence . "\n";
 
         $clio->nl(3);
         $output .= "\n\n\n";
@@ -730,19 +656,708 @@ class ClioTest extends TestCase
      * Shortcut function to pause execution until the user hits return
      */
     public function test_pause() {
-        /**
-         * @var Clio $stub
-         */
-        $stub = $this->getMockBuilder('ClioEcho')->setMethods(["readUserInput"])->getMock();
-        /** @noinspection PhpUndefinedMethodInspection */
-        $stub->method('readUserInput')
-            ->will($this->returnArgument(0));
+
+        $clio = new ClioStub();
+
+        $clio->setAnswer(["",""]);
 
         // not a lot to test, just chaining and the fact that it doesn't blow up
-        $stub->pause()->pause();
+        $clio->pause()->pause();
+
+        $this->expectOutputString(ClioStub::$startupSequencePrintable);
+    }
+
+
+    /// former HTML testing
+    /**
+     * @param $name
+     * @return ReflectionMethod
+     */
+    protected static function getMethod($name) {
+
+        // get a reflection of the class
+        $class = new ReflectionClass("Clio\\Clio");
+
+        // get the method of interest
+        $method = $class->getMethod($name);
+
+        // make that method accessible
+        $method->setAccessible(true);
+
+        // return the method
+        return $method;
+    }
+
+
+
+    /**
+     * Call the protected function processText
+     *
+     * @param Clio $html - the HTML object
+     * @param [] $args
+     * @return mixed
+     */
+    public function callProcessText($html, $args) {
+
+        // make the method accessible
+        $method = $this->getMethod("processText");
+
+        // call it and return the results
+        return $method->invokeArgs($html,$args);
+
+    }
+    /**
+     * protected function processText($text, $markupArray)
+     *
+     * Find all the markup in the text and build an array of objects
+     * representing a markup text stream
+     *
+     * param string $text
+     * param Definition | null $markupArray
+     *
+     * return array of strings and markup objects
+     */
+    public function test_processText() {
+
+        $clio = new ClioStub(Mode::VT100);
+        $output = ClioStub::$startupSequencePrintable;
+
+        $bold = (new Style())->setBold();
+        $boldMarkup = new Markup("**",$bold);
+        $underscore = (new Style())->setUnderscore();
+        $underscoreMarkup = new Markup("--",$underscore);
+
+        // first there is no text
+        $text = "";
+        $value = $this->callProcessText($clio,[$text]);
+        $this->assertSame([],$value);
+
+        // then there is no markup
+        $text = "OK";
+        $value = $this->callProcessText($clio,[$text]);
+        $this->assertSame($text,$value[0]);
+
+        //// ONE MARKUP
+        $clio->addMarkupDefinition("**",$bold);
+
+        // but it is not in the stream
+        $text = "1234567890";
+        $value = $this->callProcessText($clio,[$text]);
+
+        $this->assertSame("1234567890",$value[0]);
+
+
+        // now it is in the stream in the beginning
+        $text = "**1234567890";
+        $value = $this->callProcessText($clio,[$text]);
+
+        $this->assertEquals($boldMarkup,$value[0]);
+        $this->assertSame("1234567890",$value[1]);
+
+        // now it is in the stream in the middle
+        $text = "12345**67890";
+        $value = $this->callProcessText($clio,[$text]);
+        $this->assertSame("12345",$value[0]);
+        $this->assertEquals($boldMarkup,$value[1]);
+        $this->assertSame("67890",$value[2]);
+
+        // now it is in the stream in the end
+        $text = "1234567890**";
+        $value = $this->callProcessText($clio,[$text]);
+
+        $this->assertSame("1234567890", $value[0]);
+        $this->assertEquals($boldMarkup, $value[1]);
+
+        //// TWO Markups
+        $clio->addMarkupDefinition("--",$underscore);
+
+        // just one in the stream
+        $text = "12345678--90";
+        $value = $this->callProcessText($clio,[$text]);
+
+        $this->assertSame("12345678", $value[0]);
+        $this->assertEquals($underscoreMarkup, $value[1]);
+        $this->assertSame("90",$value[2]);
+
+
+        // both are in the stream
+        $text = "**12345678--90";
+        $value = $this->callProcessText($clio,[$text]);
+
+        $this->assertEquals($boldMarkup,$value[0]);
+        $this->assertSame("12345678", $value[1]);
+        $this->assertEquals($underscoreMarkup, $value[2]);
+        $this->assertSame("90",$value[3]);
+
+        // both are in the stream next to each other
+        $text = "**--1234567890";
+        $value = $this->callProcessText($clio,[$text]);
+
+        $this->assertEquals($boldMarkup,$value[0]);
+        $this->assertEquals($underscoreMarkup, $value[1]);
+        $this->assertSame("1234567890", $value[2]);
+
+        // only markup
+        $text = "**--";
+        $value = $this->callProcessText($clio,[$text]);
+        $this->assertEquals($boldMarkup,$value[0]);
+        $this->assertEquals($underscoreMarkup, $value[1]);
+
+
+        // both are in the stream all over the place
+        $text = "**--123**456--789**0**";
+        $value = $this->callProcessText($clio,[$text]);
+
+        $this->assertEquals($boldMarkup,$value[0]);
+        $this->assertEquals($underscoreMarkup, $value[1]);
+        $this->assertSame("123", $value[2]);
+        $this->assertEquals($boldMarkup,$value[3]);
+        $this->assertSame("456", $value[4]);
+        $this->assertEquals($underscoreMarkup,$value[5]);
+        $this->assertSame("789", $value[6]);
+        $this->assertEquals($boldMarkup,$value[7]);
+        $this->assertSame("0", $value[8]);
+        $this->assertEquals($boldMarkup,$value[9]);
+
+        $this->expectOutputString($output);
+
+    }
+
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+    //                                 Markup and Styling                                  //
+    /////////////////////////////////////////////////////////////////////////////////////////
+
+
+    /**
+     * public function addMarkupDefinition($symbol, $style)
+     *
+     * Add a markup symbol and the style associated with it
+     *
+     * param string $symbol - the markup symbol in the text
+     * param StyleInterface $style - the style to kick in when it is found
+     */
+    public function test_addMarkupDefinition_get() {
+
+        // ensure markup is placed in the markupDefinition
+        $clio = new ClioStub(Mode::VT100);
+        $output = ClioStub::$startupSequencePrintable;
+
+        $text = "This is !!bold text!!!";
+        $clio->display($text)->newLine();
+        $output .= "This is !!bold text!!!\n";
+
+        $clio->addMarkupDefinition("!!",(new Style())->setBold());
+        $markup = $clio->getMarkupDefinition();
+        $this->assertInstanceOf("Clio\\Styling\\Markup\\Definition",$markup);
+        $style = $markup->getStyling("!!");
+        $this->assertTrue($style->getBold());
+
+
+        $clio->display($text)->newLine();
+        $output .= "This is \\e[1mbold text\\e[0m!\n";
+
+        // chaining
+        $clio->addMarkupDefinition("UU",(new Style())->setUnderscore())->addMarkupDefinition("BU",(new Style())->setBold()->setUnderscore());
+        $text = "UUUnderscoreUU and BUbothBU";
+        $clio->display($text);
+        $output .= "\\e[4mUnderscore\\e[0m and \\e[1;4mboth\\e[0m";
+
+
+        $this->expectOutputString($output);
+    }
+
+
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+    //                                       Getters                                       //
+    /////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * public function getWidth()
+     *
+     * Getter for the width
+     */
+    public function test_getWidth() {
+
+        // default
+        $clio = new Clio(Mode::VT100);
+        $output = ClioStub::$startupSequence;;
+        $this->assertSame(80,$clio->getWidth());
+
+
+        // actual data
+        $clio->setWidth(1142);
+        $this->assertSame(1142,$clio->getWidth());
+
+        $this->expectOutputString($output);
+        return;
 
 
     }
+
+
+
+
+    /////////////////////////////////////////////////////////////////////////////////////////
+    //                                  Text Display                                       //
+    /////////////////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * public function newLine($count = 1)
+     *
+     * Tell the terminal to hit carriage return
+     *
+     * param int $count
+     */
+    public function test_newLine() {
+
+        $clio = new ClioStub(Mode::VT100);
+        $output = ClioStub::$startupSequencePrintable;
+        // ensure the newline goes out X times
+        $clio->newLine()->newLine();
+        $output .= "\n\n";
+
+        $clio->newLine(2);
+        $output .= "\n\n";
+
+
+        $this->expectOutputString($output);
+        return;
+
+
+
+    }
+
+
+    /**
+     * public function prompt($text)
+     *
+     * Prompt for a value.
+     *
+     * param $text - the prompt string
+     * return $this
+     */
+    public function test_prompt() {
+
+        // Create a Subject object and attach the mocked
+        // Observer object to it.
+        $clio = new ClioStub(Mode::VT100);
+        $clio->setAnswer(" ");
+        $clio->setAnswer(" ");
+
+        $clio->prompt("something");
+        $clio->prompt('something');
+
+        $this->expectOutputString(ClioStub::$startupSequencePrintable);
+
+        // ask the terminal to prompt and return the answer
+        //return $this->terminal->prompt($text);
+    }
+
+    /**
+     * public function promptWithDefault($text, $default)
+     *
+     * Prompt for a value.
+     *
+     * param string $text - the prompt string
+     * param string $default - the default value
+     *
+     * return string | null, it will return a string if it is different from the default
+     */
+    public function test_promptWithDefault() {
+
+        $clio = new ClioStub(Mode::VT100);
+
+        // answer without default
+        $clio->setAnswer([""]);
+        $answer = $clio->prompt("Question");
+        $this->assertEquals("",$answer);
+
+        $clio->setAnswer(["one"]);
+        $answer = $clio->prompt("Question");
+        $this->assertEquals("one",$answer);
+
+        // answer by hitting return
+        $clio->setAnswer([""]);
+        $answer = $clio->prompt("Question","Answer");
+        $this->assertEquals("Answer",$answer);
+
+        // answer by entering some blanks
+        $clio->setAnswer(["   "]);
+        $answer = $clio->prompt("Question","Answer");
+        $this->assertEquals("Answer",$answer);
+
+        // answer with the same answer
+        $clio->setAnswer(["Answer"]);
+        $answer = $clio->prompt("Question","Answer");
+        $this->assertEquals("Answer",$answer);
+
+        // answer with the same answer
+        $clio->setAnswer(["answer"]);
+        $answer = $clio->prompt("Question","Answer");
+        $this->assertEquals("answer",$answer);
+
+        // answer with a different answer
+        $clio->setAnswer(["Dnswer"]);
+        $answer = $clio->prompt("Question","Answer");
+        $this->assertEquals("Dnswer",$answer);
+
+        // answer by hitting return
+        $clio->setAnswer(["Answer is OK"]);
+        $answer = $clio->prompt("Question","Answer");
+        $this->assertEquals("Answer is OK",$answer);
+
+
+
+        $this->expectOutputString("\\e[H\\e[2J");
+
+
+
+    }
+
+    /**
+     * public function promptSelect($intro, $choices, $default)
+     *
+     * Prompt with a given set of choices, with highlighting showing the characters needed
+     *
+     * param string $intro - the beginning of the prompt
+     * param string[] $choices - the available choices
+     * param string $default - the default
+     * return null|string - return null if the default is chosen, otherwise the answer
+     */
+    public function test_promptSelect()  {
+        $clio = new ClioStub(Mode::VT100);
+        $output = ClioStub::$startupSequencePrintable;
+
+        // answer with default
+        $clio->setAnswer([""]);
+        $answer = $clio->promptSelect("Intro",["one","two"],"four");
+        $this->assertEquals("four",$answer);
+
+        $output .= "\\e[30;107mIntro  \\e[47m  o\\e[107mne\\e[0m \\e[30;47m  t\\e[107mwo\\e[0m [four]";
+
+        $clio->newLine();
+        $output .= "\n";
+
+        // answer with just one character
+        $clio->setAnswer(["t"]);
+        $answer = $clio->promptSelect("Intro",["one","two"]);
+        $this->assertSame("two",$answer);
+        $output .= "\\e[30;107mIntro  \\e[47m  o\\e[107mne\\e[0m \\e[30;47m  t\\e[107mwo\\e[0m ";
+
+        $clio->newLine();
+        $output .= "\n";
+
+        $this->expectOutputString($output);
+    }
+
+    /**
+     * public function promptForYes($text)
+     *
+     * Prompt for y/n, and return true if y, ye, or yes is answered
+     *
+     * param string $text
+     * return bool
+     */
+    public function test_promptForYes() {
+        $clio = new ClioStub(Mode::VT100);
+
+        // answer with a simple yes
+        $clio->setAnswer(["yes"]);
+        $answer = $clio->promptForYes("");
+        $this->assertSame(true,$answer);
+
+        // answer with a simple ye
+        $clio->setAnswer(["ye"]);
+        $answer = $clio->promptForYes("");
+        $this->assertSame(true,$answer);
+
+        // answer with a simple y
+        $clio->setAnswer(["y"]);
+        $answer = $clio->promptForYes("");
+        $this->assertSame(true,$answer);
+
+        // answer with an empty string
+        $clio->setAnswer([""]);
+        $answer = $clio->promptForYes("");
+        $this->assertSame(false,$answer);
+
+        $clio->setAnswer(["no"]);
+        $answer = $clio->promptForYes("");
+        $this->assertSame(false,$answer);
+
+        $this->expectOutputString("\\e[H\\e[2J");
+
+
+
+    }
+
+    /**
+     * public function stripMarkup($text)
+     *
+     * Strip out the currently defined markup symbols from the text
+     *
+     * param string $text
+     * return string
+     */
+    public function test_stripMarkup() {
+
+        $clio = new Clio(Mode::VT100);
+        $clio->addMarkupDefinition("!!", (new Style()));
+
+        // just make sure it works
+        $answer = $clio->stripMarkupSymbols("!!one!!two!!");
+        $this->assertEquals("onetwo",$answer);
+
+    }
+
+    /**
+     * public function justify($text, $justification, $width = 0)
+     *
+     * Justify text
+     *
+     * param string $text - the text to justify
+     * param string | int $justification - if a string, it can be "left", "RIGHT", etc..., if an int, just needs to be a Justification constant
+     * param int $width - the width to fill, if zero it will fill whatever width of the overall HTML page
+     * return string
+     */
+    public function test_justify() {
+
+        // ensure that the width is switched to the HTML width if set a zero
+        $clio = new Clio(Mode::VT100);
+        $clio->setWidth(20);
+        $text = $clio->justify("Sun","right",10);
+        $this->assertSame("       Sun",$text);
+
+        $text = $clio->justify("Sun","right");
+        $this->assertSame("                 Sun", $text);
+
+        $this->expectOutputString(ClioStub::$startupSequence);
+
+
+    }
+
+    /**
+     * public function wordwrap($text, $width = 0, $appendLastNewLine = true)
+     *
+     * Wordwrap text
+     *
+     * param string $text - the text to wordwrap
+     * param int $width - the width to do the wrapping
+     * param boolean $appendLastNewLine - whether to attach a newline to the end of the
+     *                                     of the last character
+     *
+     * return string - the text with \n's within for the wordwrapping as well as extra spaces on
+     *                  subsequent lines if deeper margin was set
+     */
+    public function test_wordwrap() {
+
+        // ensure the wordwrap switches to the HTML width if it is zero
+        $clio = new Clio(Mode::VT100);
+        $clio->setWidth(20);
+
+        $text = $clio->wordwrap("This is some long text that will be word wrapped",10);
+        $this->assertSame("This is\nsome long\ntext that\nwill be\nword\nwrapped\n",$text);
+
+        $text = $clio->wordwrap("This is some long text that will be word wrapped");
+        $this->assertSame("This is some long\ntext that will be\nword wrapped\n",$text);
+
+        // append new line
+        $text = $clio->wordwrap("Simple",10,true);
+        $this->assertSame("Simple\n",$text);
+
+
+        $this->expectOutputString(ClioStub::$startupSequence);
+
+
+    }
+
+
+    /**
+     * public function display($text, StyleInterface $temporaryStyle = null)
+     *
+     * Display text, display text in styles triggered by markup or the temporary style
+     *
+     * param string $text - with markup and \n's
+     * param StyleInterface $temporaryStyle - style to use for the duration of this text
+     *
+     * return $this
+     */
+
+    public function test_display_simple() {
+
+        $clio = new ClioStub(Mode::VT100);
+        $output = ClioStub::$startupSequencePrintable;
+
+        // test the base styling
+        // empty string
+        $text = "";
+        $clio->display($text);
+
+        // empty string
+        $text = "This is some text.";
+        $clio->display($text);
+        $output .= $text;
+
+        $this->expectOutputString($output);
+
+    }
+
+    public function test_display_default_markup() {
+
+        $clio = new ClioStub(Mode::VT100);
+        $output = ClioStub::$startupSequencePrintable;
+
+        $text = "This is __underlined__ and **bold**";
+        $clio->display($text)->newLine();
+        $output .= "This is \\e[4munderlined\\e[0m and \\e[1mbold\\e[0m\n";
+
+
+        // test chaining
+        $clio->display("one ")->display("**two**")->newLine();
+        $output .= "one \\e[1mtwo\\e[0m\n";
+
+        // put in some newlines as if wordwrap had been called
+        $clio->display("**bold**\n")->display("__underline__\n");
+        $output .= "\\e[1mbold\\e[0m\n\\e[4munderline\\e[0m\n";
+
+        $this->expectOutputString($output);
+
+    }
+
+    public function test_display_new_markup() {
+        $clio = new ClioStub(Mode::VT100);
+        $output = ClioStub::$startupSequencePrintable;
+
+        // add yellow markup
+        $yellow = (new Style())->setTextColor("yellow");
+        $clio->addMarkupDefinition("!",$yellow);
+
+        $text = "This is !yellow! text.";
+        $clio->display($text)->newLine();
+        $output .= "This is \\e[93myellow\\e[0m text.\n";
+
+        $this->expectOutputString($output);
+    }
+
+    public function test_display_do_not_close_style() {
+        $clio = new ClioStub(Mode::VT100);
+        $output = ClioStub::$startupSequencePrintable;
+
+        $yellow = (new Style())->setTextColor("yellow");
+        $clio->addMarkupDefinition("!",$yellow);
+
+        // don't close the styling
+        $text = "This is !yellow text continuing...";
+        $clio->display($text)->newLine();
+        $output .= "This is \\e[93myellow text continuing...\n";
+
+        $this->expectOutputString($output);
+    }
+
+    public function test_display_pancake_markup() {
+
+        $clio = new ClioStub(Mode::VT100);
+        $output = ClioStub::$startupSequencePrintable;
+
+        $yellow = (new Style())->setTextColor("yellow");
+        $clio->addMarkupDefinition("!",$yellow);
+
+        $blue = (new Style())->setFillColor("blue");
+        $clio->addMarkupDefinition("<blue>",$blue);
+
+        // don't close the styling
+        $text = "This is !yellow text continuing...";
+        $clio->display($text)->newLine();
+        $output .= "This is \\e[93myellow text continuing...\n";
+
+        // add some more styling and allow the previous styling to come through
+        $text = "Yellow text <blue>filled with blue<blue> now back to yellow.";
+        $clio->display($text)->newLine();
+
+        $output .= "Yellow text \\e[44mfilled with blue\\e[0;93m now back to yellow.\n";
+
+        // start fresh
+        $clio->clear();
+
+        // overlay some predefined bold
+        $text = "**This is !yellow** and !<blue>blue<blue> text.";
+        $clio->display($text)->newLine();
+        $output .= "\\e[0m\\e[1mThis is \\e[93myellow\\e[0;93m and \\e[0m\\e[44mblue\\e[0m text.\n";
+
+        $this->expectOutputString($output);
+
+    }
+    public function test_display() {
+
+
+        $clio = new ClioStub(Mode::VT100);
+        $output = ClioStub::$startupSequencePrintable;
+
+        $blue = (new Style())->setFillColor("blue");
+        $clio->addMarkupDefinition("<blue>",$blue);
+
+
+        // width of 15
+        $clio = new ClioStub(Mode::VT100);
+        $clio->setWidth(15);
+        $output .= ClioStub::$startupSequencePrintable;
+
+        // wordwrap
+        $clio->display($clio->wordwrap("This is some long text, that is going to be wrapped."));
+        $output .= "This is some\n";
+        $output .= "long text, that\n";
+        $output .= "is going to be\n";
+        $output .= "wrapped.\n";
+
+
+        // margin of 2
+        $clio = new ClioStub(Mode::VT100);
+        $clio->setWidth(15);
+        $output .= ClioStub::$startupSequencePrintable;
+
+
+        $clio->display($clio->wordwrap("This is some long text, that is going to be wrapped."));
+        $output .= "This is some\n";
+        $output .= "long text, that\n";
+        $output .= "is going to be\n";
+        $output .= "wrapped.\n";
+
+
+        // width of 15, margin of 2 and markup
+        $clio->addMarkupDefinition("<blue>",$blue);
+
+        $clio->display($clio->wordwrap("Going to start some <blue>blue text that will go on for awhile<blue> no more blue."));
+        $output .= "Going to start\n";
+        $output .= "some \\e[44mblue text\n";
+        $output .= "that will go on\n";
+        $output .= "for awhile\\e[0m no\n";
+        $output .= "more blue.\n";
+
+
+        // finally width of 15, margin of 2, default text and fill and markup
+        $clio = new ClioStub(Mode::VT100,"white","black");
+        $clio->setWidth(15);
+        $clio->addMarkupDefinition("<blue>",$blue);
+        $output .= ClioStub::$startupSequencePrintable . "\\e[97;40m";
+
+
+        $clio->display($clio->wordwrap("Going to start **some <blue>blue** text that will go on for awhile<blue> no more blue."));
+        $output .= "Going to start\n";
+        $output .= "\\e[1msome \\e[44mblue\\e[0;97;44m text\n";
+        $output .= "that will go on\n";
+        $output .= "for awhile\\e[40m no\n";
+        $output .= "more blue.\n";
+
+        $this->expectOutputString($output);
+        return;
+
+
+    }
+
 
 
 }

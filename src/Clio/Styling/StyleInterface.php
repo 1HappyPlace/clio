@@ -1,6 +1,6 @@
 <?php
 
-namespace Clio\Style;
+namespace Clio\Styling;
 
 use ANSI\Color\Color;
 use ANSI\Color\ColorInterface;

@@ -7,7 +7,7 @@ use ANSI\BasicTerminal;
 use ANSI\Color\Color;
 use ANSI\Color\Mode;
 
-use Clio\Style\Style;
+use Clio\Styling\Style;
 
 
 
@@ -195,7 +195,7 @@ class StyleTest extends TestCase
      *       bold is either on or off, while styles can pancake on each
      *       other where bold can also be undefined (null).
      *
-     * @return TerminalStateInterface
+     * return TerminalStateInterface
      */
     public function test_getState() {
 
@@ -236,7 +236,8 @@ class StyleTest extends TestCase
         $this->assertFalse($state->getFillColor()->isValid());
 
         // set the text color
-        $style->setTextColor("red");
+        $red = new Color("red");
+        $style->setTextColor($red);
         $state = $style->getState();
         $this->assertInstanceOf("\\ANSI\\TerminalState",$state);
         $this->assertFalse($state->isBold());
@@ -878,7 +879,7 @@ class StyleTest extends TestCase
      *      - String - a W3C color index name "darkblue"
      *      - integer - a number between 0-255 for the XTerm escape code
      *      - array - RGB values in the format [R,G,B]
-     * @return $this
+     * return $this
      */
     public function test_setColors() {
 
