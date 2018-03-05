@@ -24,7 +24,7 @@
     ],
     "minimum-stability": "stable",
     "require": {
-      "1happyplace/ansi-terminal": "*"
+      "1happyplace/ansi-terminal": "1.*"
     }
 }
 
