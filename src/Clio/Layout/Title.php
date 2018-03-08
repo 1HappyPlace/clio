@@ -50,6 +50,12 @@ class Title
      */
     protected $spaceAfter = 1;
 
+    /**
+     * The overall height of the title in number of lines, even lines will place the empty line below
+     * @var int
+     */
+    protected $height = 1;
+
 
     /**
      * Title constructor.
@@ -58,8 +64,9 @@ class Title
      * @param Style $style
      * @param int $spaceBefore
      * @param int $spaceAfter
+     * @param int $height
      */
-    public function __construct($clio, $justification = "left", $style, $spaceBefore = 2, $spaceAfter = 1)
+    public function __construct($clio, $justification = "left", $style, $spaceBefore = 2, $spaceAfter = 1, $height = 1)
     {
         // save the Clio object
         $this->clio = $clio;
@@ -70,6 +77,7 @@ class Title
         $this->style = $style;
         $this->spaceBefore = $spaceBefore;
         $this->spaceAfter = $spaceAfter;
+        $this->height = $height;
         
     }
     
@@ -127,9 +135,36 @@ class Title
             $this->clio->newLine($this->spaceBefore);
         }
 
+        // calculate any empty lines needed to create the height
+        $top = $bottom = 0;
 
-        // display the title
-        $this->clio->style($this->style)->display($text)->clear()->nl();
+        // if there was anything higher than one requiring empty styled lines
+        if ($this->height > 1) {
+
+            // take off the actual title line
+            $spaces = $this->height - 1;
+
+            // the top will be the base value of dividing by two
+            $top = intdiv($spaces,2);
+
+            // the bottom will be that base value + the remainder
+            $bottom = intdiv($spaces,2) + ($spaces % 2);
+        }
+
+        // set up the styling
+        $this->clio->style($this->style);
+
+        // display any empty lines needed above the title for the height
+        $this->displayEmptyLines($top);
+
+        // display the title text
+        $this->clio->line($text);
+
+        // display any empty lines needed below the title for the height
+        $this->displayEmptyLines($bottom);
+
+        // clear the formatting
+        $this->clio->clear();
 
         // if there is space after
         if ($this->spaceAfter > 0) {
@@ -141,6 +176,24 @@ class Title
 
         // chaining
         return $this;
+    }
+
+    /**
+     * Helper function to output a number of lines that have the full width
+     * @param $lines
+     */
+    private function displayEmptyLines($lines)
+    {
+        // create an empty line
+        $emptyLine = str_pad(" ", $this->clio->getWidth());
+
+        // if there is more than one line
+        for ($i = 0; $i < $lines; ++$i) {
+
+            // generate an empty line
+            $this->clio->line($emptyLine);
+        }
+
     }
 
 }

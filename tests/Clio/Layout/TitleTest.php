@@ -60,7 +60,7 @@ class TitleTest extends PHPUnit_Framework_TestCase
 
         // out of the box title
         $title->display("1");
-        $output .= "\\e[1m1    \\e[0m\n";
+        $output .= "\\e[1m1    \n";
 
 
         $clio = new ClioStub(Mode::VT100);
@@ -70,18 +70,18 @@ class TitleTest extends PHPUnit_Framework_TestCase
 
         // straight title
         $title->display("Title");
-        $output .= "\\e[1mTitle     \\e[0m\n";
+        $output .= "\\e[1mTitle     \n";
 
 
         // trimming
         $title->display("   Title     ");
-        $output .= "\\e[1mTitle     \\e[0m\n";
+        $output .= "Title     \n";
 
         // center justified
         $title = new Title($clio,"center", $emptyStyle,0,0);
 
         $title->display("Title");
-        $output .= "\\e[1m  Title   \\e[0m\n";
+        $output .= "  Title   \n";
 
         // add a margin
         $clio = new ClioStub(Mode::VT100);
@@ -91,7 +91,7 @@ class TitleTest extends PHPUnit_Framework_TestCase
 
 
         $title->display("Title");
-        $output .= "\\e[1mTitle     \\e[0m\n";
+        $output .= "\\e[1mTitle     \n";
 
         $this->expectOutputString($output);
 
@@ -132,7 +132,7 @@ class TitleTest extends PHPUnit_Framework_TestCase
         // color and centered
         $title = new Title($clio,"center",$style,0,0);
         $title->display("Bar Title");
-        $output .= "\\e[1;97;40m     Bar Title      \\e[0m\n";
+        $output .= "\\e[1;97;40m     Bar Title      \n";
 
 
         $this->expectOutputString($output);
@@ -155,15 +155,91 @@ class TitleTest extends PHPUnit_Framework_TestCase
         $title = new Title($clio, "right", $fullStyle, 1, 0);
         $title->display("123");
 
-        $output .= "\n\\e[1;4;38;2;255;0;0;48;2;0;0;255m       123\\e[0m\n";
+        $output .= "\n\\e[1;4;38;2;255;0;0;48;2;0;0;255m       123\n";
 
         // test space after
         $title = new Title($clio, "right", $fullStyle, 0, 1);
         $title->display("12345678901");
 
-        $output .= "\\e[1;4;38;2;255;0;0;48;2;0;0;255m1234567890\\e[0m\n\n";
+        $output .= "1234567890\n\\e[0m\n";
 
         $this->expectOutputString($output);
+
+    }
+
+    public function test_height() {
+
+        $bold = new Style(true);
+        $underline = new Style(null, true);
+        $cyanText = new Style(null,null,Color::cyan());
+        $cyanFill = new Style(null,null,null,Color::cyan());
+
+        $clio = new ClioStub();
+        $output = ClioStub::$startupSequencePrintable;
+        $clio->setWidth(5);
+
+        // 1 height
+        $title = new Title($clio, "center", $bold, 0, 0, 1);
+        $title->display("123");
+
+        // just a regular title, no extra
+        $output .= "\\e[1m 123 \n";
+
+
+
+        // negative height
+        $title = new Title($clio, "center", $underline, 0, 0, -1);
+        $title->display("123");
+
+        // just a regular title, no extra
+        $output .= "\\e[0;4m 123 \n";
+
+
+
+        // height = 2
+        $title = new Title($clio, "center", $cyanText, 0, 0, 2);
+        $title->display("123");
+
+        // just a regular title, no extra
+        $output .= "\\e[0;38;5;14m 123 \n";
+        $output .= "     \n";
+
+        // height = 3
+        $title = new Title($clio, "center", $cyanFill, 0, 0, 3);
+        $title->display("123");
+
+        // just a regular title, no extra
+        $output .= "\\e[0;48;5;14m     \n";
+        $output .= " 123 \n";
+        $output .= "     \n";
+
+
+
+        // height = 4
+        $title = new Title($clio, "center", $bold, 0, 0, 4);
+        $title->display("123");
+
+        // just a regular title, no extra
+        $output .= "\\e[0;1m     \n";
+        $output .= " 123 \n";
+        $output .= "     \n";
+        $output .= "     \n";
+
+
+
+        // height = 5
+        $title = new Title($clio, "center", $underline, 0, 0, 5);
+        $title->display("123");
+
+        // just a regular title, no extra
+        $output .= "\\e[0;4m     \n";
+        $output .= "     \n";
+        $output .= " 123 \n";
+        $output .= "     \n";
+        $output .= "     \n";
+
+        $this->expectOutputString($output);
+        return;
 
     }
 
