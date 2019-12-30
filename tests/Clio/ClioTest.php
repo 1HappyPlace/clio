@@ -945,8 +945,7 @@ class ClioTest extends TestCase
         // Create a Subject object and attach the mocked
         // Observer object to it.
         $clio = new ClioStub(Mode::VT100);
-        $clio->setAnswer(" ");
-        $clio->setAnswer(" ");
+        $clio->setAnswer([" "," "]);
 
         $clio->prompt("something");
         $clio->prompt('something');

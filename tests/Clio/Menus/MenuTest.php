@@ -93,7 +93,7 @@ class MenuTest extends PHPUnit_Framework_TestCase
         $method = $this->getMethod("determineUniqueCharacterCount");
 
         //  null choices, null default
-        $choices = null;
+        $choices = [];
         $default = null;
         $answer = $method->invokeArgs($menu,[$choices, $default]);
         $this->assertNull($answer);
@@ -135,7 +135,7 @@ class MenuTest extends PHPUnit_Framework_TestCase
 
 
         // default in play
-        $choices = null;
+        $choices = [];
         $default = "default";
         $answer = $method->invokeArgs($menu,[$choices, $default]);
         $this->assertSame(1,$answer);
@@ -198,7 +198,7 @@ class MenuTest extends PHPUnit_Framework_TestCase
         $menu = new Menu($clio);
 
         // no choices
-        $answer = $menu->menu(null);
+        $answer = $menu->menu([]);
         $this->assertNull($answer);
 
         // same choices
@@ -294,7 +294,7 @@ class MenuTest extends PHPUnit_Framework_TestCase
         $menu = new Menu($clio);
 
         // no choice, only default
-        $answer = $menu->menu(null,"default");
+        $answer = $menu->menu([],"default");
         $this->assertNull($answer);
 
         // same choice and default
