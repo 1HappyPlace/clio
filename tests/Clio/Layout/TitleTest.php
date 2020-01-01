@@ -6,21 +6,22 @@ use ANSI\Color\Color;
 use ANSI\Color\Mode;
 use Clio\Layout\Title;
 use Clio\Styling\Style;
+use PHPUnit\Framework\TestCase;
 
 
-class TitleTest extends PHPUnit_Framework_TestCase
+class TitleTest extends TestCase
 {
 
 
 
-    public function setUp()
+    public function setUp(): void
     {
 
 
 
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
 
     }

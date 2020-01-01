@@ -27,7 +27,7 @@ class StyleTest extends TestCase
     private $magenta;
 
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->CSI = chr(27) . "[";
         $this->CSE = "m";
@@ -44,10 +44,7 @@ class StyleTest extends TestCase
 
     }
 
-    public function tearDown()
-    {
 
-    }
 
     /**
      * __construct($bold = null, $underscore = null, ColorInterface $textColor = null, ColorInterface $fillColor = null)

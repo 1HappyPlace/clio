@@ -5,18 +5,19 @@ use ANSI\Color\Color;
 use Clio\Styling\Markup\Markup;
 use Clio\Styling\Markup\Stack;
 use Clio\Styling\Style;
+use PHPUnit\Framework\TestCase;
 
-class StackItTest extends PHPUnit_Framework_TestCase
+class StackItTest extends TestCase
 {
 
 
-    public function setUp()
+    public function setUp(): void
     {
 
 
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
 
     }

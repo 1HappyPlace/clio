@@ -3,18 +3,19 @@
 require_once __DIR__ . "/../../../TestStubs/ClioStub.php";
 use ANSI\Color\Mode;
 use Clio\Styling\Markup\NewLine;
+use PHPUnit\Framework\TestCase;
 
-class NewLineTest extends PHPUnit_Framework_TestCase
+class NewLineTest extends TestCase
 {
 
 
-    public function setUp()
+    public function setUp(): void
     {
 
 
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
 
     }

@@ -2,21 +2,22 @@
 
 use Clio\Layout\Paragraph;
 use Clio\Styling\Style;
+use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/../../TestStubs/ClioStub.php";
 
-class ParagraphTest extends PHPUnit_Framework_TestCase
+class ParagraphTest extends TestCase
 {
 
 
 
-    public function setUp()
+    public function setUp(): void
     {
 
 
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
 
     }

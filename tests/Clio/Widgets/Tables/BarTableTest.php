@@ -4,22 +4,23 @@
 use ANSI\Color\Mode;
 use Clio\Widgets\Tables\BarTable;
 use Clio\Widgets\Tables\Column;
+use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/../../../TestStubs/ClioStub.php";
 
-class BarTableTest extends PHPUnit_Framework_TestCase
+class BarTableTest extends TestCase
 {
 
 
 
-    public function setUp()
+    public function setUp(): void
     {
 
 
 
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
 
     }

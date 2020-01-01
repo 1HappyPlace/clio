@@ -4,18 +4,19 @@
 use Clio\Styling\Markup\Definition;
 use Clio\Styling\Markup\Markup;
 use Clio\Styling\Style;
+use PHPUnit\Framework\TestCase;
 
-class DefinitionTest extends PHPUnit_Framework_TestCase
+class DefinitionTest extends TestCase
 {
 
 
-    public function setUp()
+    public function setUp(): void
     {
 
 
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
 
     }

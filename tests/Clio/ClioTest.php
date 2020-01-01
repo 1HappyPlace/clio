@@ -15,13 +15,13 @@ class ClioTest extends TestCase
 
 
 
-    public function setUp() {
+    public function setUp(): void {
 
 
 
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
 
     }
@@ -113,16 +113,6 @@ class ClioTest extends TestCase
 
     }
 
-    /**
-     * ABSTRACT
-     * public function carriageReturn()
-     * 
-     * Anytime the cursor is returned to the leftmost column, this is fired
-     */
-    public function test_carriageReturn()
-    {
-        // nothing to be done
-    }
 
 
     /**

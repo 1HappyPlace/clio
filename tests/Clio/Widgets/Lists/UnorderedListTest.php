@@ -3,24 +3,25 @@
 use ANSI\Color\Mode;
 use Clio\Widgets\Lists\UnorderedList;
 use Clio\Styling\Style;
+use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/../../../TestStubs/ClioStub.php";
 
 
 
-class UnorderedListTest extends PHPUnit_Framework_TestCase
+class UnorderedListTest extends TestCase
 {
 
 
 
-    public function setUp()
+    public function setUp(): void
     {
 
 
 
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
 
     }

@@ -7,22 +7,23 @@ use Clio\Styling\Markup\Justification;
 use Clio\Widgets\Tables\Column;
 use Clio\Widgets\Tables\Table;
 use Clio\Styling\Style;
+use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/../../../TestStubs/ClioStub.php";
 
-class TableTest extends PHPUnit_Framework_TestCase
+class TableTest extends TestCase
 {
 
 
 
-    public function setUp()
+    public function setUp(): void
     {
 
 
 
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
 
     }

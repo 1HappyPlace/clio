@@ -6,20 +6,21 @@ use ANSI\Color\Mode;
 use Clio\Clio;
 use Clio\Menus\Menu;
 use Clio\Styling\Style;
+use PHPUnit\Framework\TestCase;
 
-class MenuTest extends PHPUnit_Framework_TestCase
+class MenuTest extends TestCase
 {
 
 
 
-    public function setUp()
+    public function setUp(): void
     {
 
 
 
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
 
     }

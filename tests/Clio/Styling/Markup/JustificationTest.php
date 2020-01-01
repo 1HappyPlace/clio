@@ -1,21 +1,21 @@
 <?php
 
 use Clio\Styling\Markup\Justification;
+use PHPUnit\Framework\TestCase;
 
-
-class JustificationTest extends PHPUnit_Framework_TestCase
+class JustificationTest extends TestCase
 {
 
 
 
 
-    public function setUp()
+    public function setUp(): void
     {
 
 
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
 
     }
