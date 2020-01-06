@@ -8,16 +8,16 @@
     "packages": [
         {
             "name": "1happyplace/ansi-terminal",
-            "version": "v1.0",
+            "version": "v1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/1HappyPlace/ansi-terminal.git",
-                "reference": "3a550eadb21bb87a6909436c3b961919d2731923"
+                "reference": "d5e2942e493ce815e63fab83b0bcc48816f7513a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/1HappyPlace/ansi-terminal/zipball/3a550eadb21bb87a6909436c3b961919d2731923",
-                "reference": "3a550eadb21bb87a6909436c3b961919d2731923",
+                "url": "https://api.github.com/repos/1HappyPlace/ansi-terminal/zipball/d5e2942e493ce815e63fab83b0bcc48816f7513a",
+                "reference": "d5e2942e493ce815e63fab83b0bcc48816f7513a",
                 "shasum": ""
             },
             "require": {
@@ -25,7 +25,7 @@
             },
             "require-dev": {
                 "1happyplace/phpunit-colors": "1.*",
-                "phpunit/phpunit": "^5.4"
+                "phpunit/phpunit": "^8.5"
             },
             "type": "library",
             "autoload": {
@@ -52,29 +52,29 @@
                 "emulator",
                 "terminal"
             ],
-            "time": "2016-11-30T14:27:05+00:00"
+            "time": "2020-01-06T18:52:42+00:00"
         }
     ],
     "packages-dev": [
         {
             "name": "1happyplace/phpunit-colors",
-            "version": "v1.1",
+            "version": "v1.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/1HappyPlace/phpunit-colors.git",
-                "reference": "05d40d2a2feb8b95e7e845c86afb93fa54bd5f18"
+                "reference": "e55b04a1cd80d84f5b841d2a7effe4e38d7291f2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/1HappyPlace/phpunit-colors/zipball/05d40d2a2feb8b95e7e845c86afb93fa54bd5f18",
-                "reference": "05d40d2a2feb8b95e7e845c86afb93fa54bd5f18",
+                "url": "https://api.github.com/repos/1HappyPlace/phpunit-colors/zipball/e55b04a1cd80d84f5b841d2a7effe4e38d7291f2",
+                "reference": "e55b04a1cd80d84f5b841d2a7effe4e38d7291f2",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.0"
             },
             "require-dev": {
-                "phpunit/phpunit": "^5.4"
+                "phpunit/phpunit": "^8.5"
             },
             "type": "library",
             "autoload": {
@@ -101,7 +101,7 @@
                 "output",
                 "phpunit"
             ],
-            "time": "2016-11-30T14:18:45+00:00"
+            "time": "2020-01-06T18:19:43+00:00"
         },
         {
             "name": "doctrine/instantiator",
