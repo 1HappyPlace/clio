@@ -7,7 +7,7 @@ use Clio\Styling\Markup\Stack;
 use Clio\Styling\Style;
 use PHPUnit\Framework\TestCase;
 
-class StackItTest extends TestCase
+class StackTest extends TestCase
 {
 
 
