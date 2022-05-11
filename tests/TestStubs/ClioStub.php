@@ -59,7 +59,12 @@ class ClioStub extends Clio {
 
     public function justPrompt($text) {
 
-        $answer = $this->answers[$this->answerPlacement];
+        if ($this->answerPlacement < count($this->answers)) {
+            $answer = $this->answers[$this->answerPlacement];
+        } else {
+            return null;
+        }
+
 
         if ($this->answerPlacement < (count($this->answers) - 1)) {
             ++$this->answerPlacement;

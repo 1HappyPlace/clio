@@ -202,12 +202,19 @@ class Menu
         $temp = [];
         // change all the choices to lower case, since everything is capitalization agnostic in menus
         foreach ($choices AS $choice) {
-            $temp[] = strtolower($choice);
+
+            // make it lower case
+            $lower = strtolower($choice);
+
+            // all choices should be unique
+            if (!in_array($lower, $temp)) {
+
+                // add the lower case version
+                $temp[] = $lower;
+            }
+
         }
         $choices = $temp;
-
-        // find the shortest string in the choices, this is our farthest we can go with unique characters
-        $maxLimit = $this->narrowest($choices);
 
         // keep track of the character count needed
         $minCharacterCount = 0;
@@ -223,13 +230,6 @@ class Menu
 
             // increase the character count
             ++$minCharacterCount;
-
-            // if we have gone beyond the smallest string
-            if ($minCharacterCount > $maxLimit) {
-
-                // error, it is impossible to have a unique substring to indicate one string out of choices
-                return null;
-            }
 
             // scan the choices
             foreach ($choices AS $choice) {
@@ -370,7 +370,7 @@ class Menu
                 } else {
 
                     // default wasn't defined
-                    echo "Try again.\n";
+                    return null;
                 }
 
             // have an actual answer, check to see if it is the beginning of a selection

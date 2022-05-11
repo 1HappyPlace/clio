@@ -122,12 +122,12 @@ class MenuTest extends TestCase
         // two choices, same choices
         $choices = ["one", "one"];
         $answer = $method->invokeArgs($menu,[$choices, $default]);
-        $this->assertSame(null,$answer);
+        $this->assertSame(1,$answer);
 
         // two choices different lengths, but still no real choice
         $choices = ["one", "o"];
         $answer = $method->invokeArgs($menu,[$choices, $default]);
-        $this->assertSame(null,$answer);
+        $this->assertSame(2,$answer);
 
         // Causes 3 choices
         $choices = ["apple","banana","apricot"];
@@ -166,13 +166,13 @@ class MenuTest extends TestCase
         $default = "one";
         $choices = ["one"];
         $answer = $method->invokeArgs($menu,[$choices, $default]);
-        $this->assertSame(null,$answer);
+        $this->assertSame(1,$answer);
 
         // two choices different lengths, but still no real choice
         $default = "o";
         $choices = ["one", "ones"];
         $answer = $method->invokeArgs($menu,[$choices, $default]);
-        $this->assertSame(null,$answer);
+        $this->assertSame(4,$answer);
 
         // Causes 3 choices
         $default = "apricot";
@@ -210,7 +210,7 @@ class MenuTest extends TestCase
         $clio->setAnswer(["one"]);
         $answer = $menu->menu(["one","two"]);
         $this->assertSame("one",$answer);
-        $output .= "\\e[97;40mMenu  \\e[30;47m  o\\e[30;107mne\\e[0m \\e[30;47m  t\\e[30;107mwo\\e[0m ";
+        $output .= "\\e[97;40mMenu  \\e[30;47m  o\\e[30;107mne\\e[0m \\e[30;47m  o\\e[30;107mne\\e[0m \\e[97;40mMenu  \\e[30;47m  o\\e[30;107mne\\e[0m \\e[30;47m  t\\e[30;107mwo\\e[0m ";
 
         $clio->newLine();
         $output .= "\n";
@@ -307,8 +307,8 @@ class MenuTest extends TestCase
         $answer = $menu->menu(["one"],"two");
         $this->assertSame("one",$answer);
 
-        $menuOutput = "\\e[97;40mMenu  \\e[30;47m  o\\e[30;107mne\\e[0m [two]";
-        $output .= $menuOutput;
+        $output = "\\e[H\\e[2J\\e[97;40mMenu  \\e[30;47m  o\\e[30;107mne\\e[0m \\e[30;47m  o\\e[30;107mne\\e[0m \\e[97;40mMenu  \\e[30;47m  o\\e[30;107mne\\e[0m [two]";
+
 
         $clio->newLine();
         $output .= "\n";
@@ -317,7 +317,7 @@ class MenuTest extends TestCase
         $clio->setAnswer(["t"]);
         $answer = $menu->menu(["one"],"two");
         $this->assertSame("two",$answer);
-        $output .= $menuOutput;
+        $output .= "\\e[97;40mMenu  \\e[30;47m  o\\e[30;107mne\\e[0m [two]";
 
         $clio->newLine();
         $output .= "\n";
@@ -326,7 +326,7 @@ class MenuTest extends TestCase
         $clio->setAnswer([""]);
         $answer = $menu->menu(["one"],"two");
         $this->assertSame("two",$answer);
-        $output .= $menuOutput;
+        $output .= "\\e[97;40mMenu  \\e[30;47m  o\\e[30;107mne\\e[0m [two]";
 
         $clio->newLine();
         $output .= "\n";
@@ -335,7 +335,7 @@ class MenuTest extends TestCase
         $clio->setAnswer(["x","on"]);
         $answer = $menu->menu(["one"],"two");
         $this->assertSame("one",$answer);
-        $output .= $menuOutput;
+        $output .= "\\e[97;40mMenu  \\e[30;47m  o\\e[30;107mne\\e[0m [two]";
         $output .= "Try again.\n";
 
         $clio->newLine();
@@ -392,6 +392,20 @@ class MenuTest extends TestCase
         $answer = $menu->menu(["one"],"two");
         $this->assertSame("one",$answer);
         $output .= "\\e[97;40mPlease select:  \\e[30;47m  o\\e[30;107mne\\e[0m [two]";
+
+        // longer title
+        $clio->setAnswer(["london"]);
+        $menu->setTitle("Please select:");
+        $answer = $menu->menu(["london", "londoner"]);
+        $this->assertSame("london",$answer);
+        $output .= "\\e[97;40mPlease select:  \\e[30;47m  london\\e[30;107m\\e[0m \\e[30;47m  londone\\e[30;107mr\\e[0m ";
+
+        // longer title
+        $clio->setAnswer(["londoner"]);
+        $menu->setTitle("Please select:");
+        $answer = $menu->menu(["one","london", "londoner"]);
+        $this->assertSame("londoner",$answer);
+        $output .= "\\e[97;40mPlease select:  \\e[30;47m  one\\e[30;107m\\e[0m \\e[30;47m  london\\e[30;107m\\e[0m \\e[30;47m  londone\\e[30;107mr\\e[0m ";
 
         $this->expectOutputString($output);
     }
